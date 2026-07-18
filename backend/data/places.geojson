@@ -1,0 +1,173 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Montpellier",
+        "region": "H\u00e9rault"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.8767,
+          43.6108
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Beziers",
+        "region": "H\u00e9rault"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.2158,
+          43.3442
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sete",
+        "region": "H\u00e9rault"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.6976,
+          43.4028
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Lodeve",
+        "region": "H\u00e9rault"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.3181,
+          43.7322
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Lunel",
+        "region": "H\u00e9rault"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.1361,
+          43.6761
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Agde",
+        "region": "H\u00e9rault"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.4758,
+          43.3108
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Pezenas",
+        "region": "H\u00e9rault"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.4233,
+          43.46
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Clermont",
+        "region": "H\u00e9rault"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.4331,
+          43.6275
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Gignac",
+        "region": "H\u00e9rault"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.5522,
+          43.6522
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Frontignan",
+        "region": "H\u00e9rault"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          3.7558,
+          43.4489
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Mauguio",
+        "region": "H\u00e9rault"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          4.0089,
+          43.6167
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Saint-Pons",
+        "region": "H\u00e9rault"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.7667,
+          43.4833
+        ]
+      }
+    }
+  ]
+}

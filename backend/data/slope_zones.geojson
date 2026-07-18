@@ -1,0 +1,153 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "slope_000",
+        "name": "Escandorgue foothills",
+        "max_slope_pct": 12.5,
+        "region": "H\u00e9rault",
+        "source": "synthetic_sample"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.2,
+              43.68
+            ],
+            [
+              3.4,
+              43.68
+            ],
+            [
+              3.4,
+              43.78
+            ],
+            [
+              3.2,
+              43.78
+            ],
+            [
+              3.2,
+              43.68
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "slope_001",
+        "name": "Larzac edge (south)",
+        "max_slope_pct": 14.0,
+        "region": "H\u00e9rault",
+        "source": "synthetic_sample"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.28,
+              43.72
+            ],
+            [
+              3.45,
+              43.72
+            ],
+            [
+              3.45,
+              43.8
+            ],
+            [
+              3.28,
+              43.8
+            ],
+            [
+              3.28,
+              43.72
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "slope_002",
+        "name": "Clermont hills",
+        "max_slope_pct": 9.5,
+        "region": "H\u00e9rault",
+        "source": "synthetic_sample"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.38,
+              43.6
+            ],
+            [
+              3.5,
+              43.6
+            ],
+            [
+              3.5,
+              43.66
+            ],
+            [
+              3.38,
+              43.66
+            ],
+            [
+              3.38,
+              43.6
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "slope_003",
+        "name": "Gignac ridge",
+        "max_slope_pct": 8.0,
+        "region": "H\u00e9rault",
+        "source": "synthetic_sample"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              3.52,
+              43.64
+            ],
+            [
+              3.6,
+              43.64
+            ],
+            [
+              3.6,
+              43.68
+            ],
+            [
+              3.52,
+              43.68
+            ],
+            [
+              3.52,
+              43.64
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

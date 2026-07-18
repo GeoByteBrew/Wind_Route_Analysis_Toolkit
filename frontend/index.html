@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wind Route Analysis Toolkit · Hérault</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="panel">
+        <header class="brand">
+          <p class="brand__mark">Wind Route Analysis Toolkit</p>
+          <h1>Oversized transport routing for Hérault</h1>
+          <p class="brand__sub">
+            Click the map to set departure and destination, set vehicle limits, then run analysis on sample open data.
+          </p>
+        </header>
+
+        <section class="section">
+          <h2>Points</h2>
+          <div class="point-row">
+            <button type="button" id="btn-mode-start" class="chip chip--active" data-mode="start">
+              Select Start
+            </button>
+            <button type="button" id="btn-mode-end" class="chip" data-mode="end">
+              Select Destination
+            </button>
+          </div>
+          <dl class="coords">
+            <div>
+              <dt>Start</dt>
+              <dd id="start-label">—</dd>
+            </div>
+            <div>
+              <dt>Destination</dt>
+              <dd id="end-label">—</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="section">
+          <h2>Vehicle</h2>
+          <div class="grid-2">
+            <label>
+              Max length (m)
+              <input id="length" type="number" step="0.1" value="45" min="1" />
+            </label>
+            <label>
+              Max width (m)
+              <input id="width" type="number" step="0.1" value="4.5" min="1" />
+            </label>
+            <label>
+              Max height (m)
+              <input id="height" type="number" step="0.1" value="4.2" min="1" />
+            </label>
+            <label>
+              Max weight (t)
+              <input id="weight" type="number" step="0.1" value="80" min="1" />
+            </label>
+            <label class="span-2">
+              Max slope (%)
+              <input id="slope" type="number" step="0.1" value="8" min="1" />
+            </label>
+          </div>
+        </section>
+
+        <section class="section actions">
+          <button type="button" id="btn-analyze" class="btn btn--primary">Run Analysis</button>
+          <button type="button" id="btn-reset" class="btn btn--ghost">Reset</button>
+          <p id="status" class="status" role="status"></p>
+        </section>
+
+        <section class="section" id="summary-section" hidden>
+          <h2>Result</h2>
+          <div id="summary" class="summary"></div>
+          <div id="downloads" class="downloads"></div>
+        </section>
+
+        <footer class="footnote">
+          Demo region: Hérault · Montpellier area · Synthetic sample data · Not for operational planning
+        </footer>
+      </aside>
+
+      <main class="map-wrap">
+        <div id="map" aria-label="Hérault route map"></div>
+        <div class="map-legend" aria-hidden="true">
+          <span><i class="swatch swatch--route"></i>Route</span>
+          <span><i class="swatch swatch--bridge"></i>Low bridge</span>
+          <span><i class="swatch swatch--slope"></i>Steep slope</span>
+          <span><i class="swatch swatch--road"></i>Road network</span>
+        </div>
+      </main>
+    </div>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="/static/js/map.js"></script>
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>

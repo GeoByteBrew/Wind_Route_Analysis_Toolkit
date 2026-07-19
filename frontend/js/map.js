@@ -7,13 +7,14 @@ const MapView = (() => {
       route: null,
       markers: null,
       obstacles: null,
+      profile: null,
     },
     startMarker: null,
     endMarker: null,
     clickHandler: null,
   };
 
-  function init(center = [44.70, 4.35], zoom = 7) {
+  function init(center = [44.7, 4.35], zoom = 7) {
     if (state.map) return state.map;
 
     state.map = L.map("map", {
@@ -35,9 +36,7 @@ const MapView = (() => {
   }
 
   function onClick(handler) {
-    if (state.clickHandler) {
-      state.map.off("click", state.clickHandler);
-    }
+    if (state.clickHandler) state.map.off("click", state.clickHandler);
     state.clickHandler = (e) => handler(e.latlng);
     state.map.on("click", state.clickHandler);
   }
@@ -66,6 +65,7 @@ const MapView = (() => {
 
   function clearAnalysis() {
     state.layers.route.clearLayers();
+    state.layers.profile.clearLayers();
   }
 
   function clearObstacles() {
@@ -92,6 +92,21 @@ const MapView = (() => {
     }
   }
 
+  function drawProfile(profile) {
+    state.layers.profile.clearLayers();
+    if (!profile || !profile.length) return;
+    profile.forEach((p) => {
+      const m = L.circleMarker([p.lat, p.lon], {
+        radius: 4,
+        color: "#245c42",
+        fillColor: "#fff",
+        fillOpacity: 1,
+        weight: 2,
+      }).addTo(state.layers.profile);
+      m.bindTooltip(p.km_label, { permanent: false, direction: "top" });
+    });
+  }
+
   function drawObstacles(obstacles) {
     clearObstacles();
     obstacles.forEach((obs) => {
@@ -103,7 +118,9 @@ const MapView = (() => {
             ? "#b45309"
             : status === "ok"
               ? "#157a4b"
-              : "#1f6b4a";
+              : status === "off_route"
+                ? "#64748b"
+                : "#1f6b4a";
       const marker = L.circleMarker([obs.lat, obs.lon], {
         radius: 8,
         color,
@@ -111,16 +128,24 @@ const MapView = (() => {
         fillColor: color,
         fillOpacity: 0.85,
       }).addTo(state.layers.obstacles);
+
+      const km = obs.km_label || (obs.km != null ? `km ${obs.km}` : "");
+      if (km) {
+        marker.bindTooltip(km, { permanent: true, direction: "right", offset: [8, 0], className: "km-label" });
+      }
       marker.bindPopup(
-        `<strong>${obs.name}</strong><br/>${obs.type}<br/>value: ${obs.value ?? "—"}<br/>${obs.detail || status}`
+        `<strong>${obs.name}</strong><br/>
+         ${km ? km + "<br/>" : ""}
+         ${obs.type} · ${obs.value ?? "—"}<br/>
+         severity: ${obs.severity || "—"} · bypass: ${obs.bypass_possible ? "yes" : "no"}<br/>
+         ${obs.detail || status}`
       );
     });
   }
 
   function drawAnalysis(result) {
-    if (result.route) {
-      drawUploadedRoute(result.route);
-    }
+    if (result.route) drawUploadedRoute(result.route);
+    if (result.distance_profile) drawProfile(result.distance_profile);
     if (result.obstacles && result.obstacles.features) {
       const list = result.obstacles.features.map((f) => ({
         name: f.properties.name,
@@ -130,6 +155,11 @@ const MapView = (() => {
         lat: f.geometry.coordinates[1],
         status: f.properties.status,
         detail: f.properties.detail,
+        km: f.properties.km,
+        km_label: f.properties.km_label,
+        severity: f.properties.severity,
+        bypass_possible: f.properties.bypass_possible,
+        note: f.properties.note,
       }));
       drawObstacles(list);
     }
@@ -145,5 +175,6 @@ const MapView = (() => {
     drawAnalysis,
     drawUploadedRoute,
     drawObstacles,
+    drawProfile,
   };
 })();

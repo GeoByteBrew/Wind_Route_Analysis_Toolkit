@@ -2,7 +2,7 @@
 
 Python + Leaflet Web GIS toolkit for analyzing oversized transport corridors.
 
-**Workflow:** upload a real route (My Maps **KMZ**/KML · GeoJSON · GPX) → mark obstacles on the map → compare against vehicle limits → export PDF / CSV / GeoJSON.
+**Workflow:** upload a real route (My Maps **KMZ**/KML · GeoJSON · GPX) → snap obstacles to **chainage (km)** → apply vehicle templates → export PDF / CSV / GeoJSON / project JSON.
 
 Includes a built-in sample: **Montpellier → Lyon** (KMZ).
 
@@ -13,10 +13,12 @@ Includes a built-in sample: **Montpellier → Lyon** (KMZ).
 ## Features
 
 - **Upload route** — GeoJSON, KML, **KMZ**, GPX
-- **Obstacle annotation** — low bridge, narrow road, weight limit, steep slope, notes
-- **Vehicle constraints** — length / width / height / weight / max slope
-- **Automatic feasibility report** — conflict vs caution vs ok
-- **Exports** — GeoJSON · CSV · PDF
+- **Km snap / chainage** — obstacles snap onto the corridor (`km 42.30`)
+- **Rich obstacles** — severity, bypass flag, note, optional photo
+- **Vehicle templates** — wind blade · tower section · nacelle · custom
+- **Distance profile** — markers every ~50 km in map + PDF
+- **Checklist report** — conflicts in km order + field checklist
+- **Save / load project** — download JSON · autosave in browser · server copy
 - **Sample corridor** — Montpellier → Lyon KMZ with example obstacles
 
 ## Technologies

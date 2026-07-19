@@ -6,7 +6,9 @@
     "value": 3.7,
     "lon": 4.62745,
     "lat": 43.95685,
-    "note": "Sample obstacle for Montpellier → Lyon demo"
+    "note": "Sample obstacle — verify clearance on site",
+    "severity": "high",
+    "bypass_possible": false
   },
   {
     "id": "obs_valence_width",
@@ -15,7 +17,9 @@
     "value": 4.0,
     "lon": 4.80729,
     "lat": 44.54327,
-    "note": "Sample obstacle for Montpellier → Lyon demo"
+    "note": "Tight urban / roadside furniture",
+    "severity": "medium",
+    "bypass_possible": true
   },
   {
     "id": "obs_vienne_weight",
@@ -24,6 +28,8 @@
     "value": 50,
     "lon": 4.86352,
     "lat": 45.21225,
-    "note": "Sample obstacle for Montpellier → Lyon demo"
+    "note": "Posted limit — confirm with local authority",
+    "severity": "critical",
+    "bypass_possible": false
   }
 ]

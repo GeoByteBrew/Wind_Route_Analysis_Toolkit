@@ -360,6 +360,68 @@ select {
   border-color: var(--accent);
 }
 
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: var(--ink);
+  margin-top: 1.4rem;
+}
+
+.check-label input {
+  width: auto;
+}
+
+.file-as-btn {
+  display: block;
+  text-align: center;
+  cursor: pointer;
+}
+
+.checklist ul {
+  list-style: none;
+  margin: 0.65rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.checklist li {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  padding: 0.5rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-size: 0.82rem;
+}
+
+.checklist li.done {
+  border-color: rgba(21, 122, 75, 0.25);
+}
+
+.checklist li span:first-child {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.leaflet-tooltip.km-label {
+  background: rgba(15, 61, 46, 0.92);
+  border: 0;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 650;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+.leaflet-tooltip.km-label::before {
+  border-right-color: rgba(15, 61, 46, 0.92);
+}
+
 .map-wrap {
   position: relative;
   min-height: 0;

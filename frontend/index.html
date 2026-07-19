@@ -25,7 +25,7 @@
           <p class="brand__mark">Route Analysis Toolkit</p>
           <h1>Upload a corridor. Mark obstacles. Get a report.</h1>
           <p class="brand__sub">
-            Import a route from My Maps (KMZ/KML), GeoJSON, or GPX. Place clearance / width / weight / slope constraints on the map, then export PDF · CSV · GeoJSON.
+            KMZ/KML/GeoJSON/GPX → snap obstacles to chainage (km) → vehicle templates → PDF checklist.
           </p>
         </header>
 
@@ -48,35 +48,12 @@
         </section>
 
         <section class="section">
-          <h2>2. Add obstacle</h2>
-          <div class="grid-2">
-            <label class="span-2">
-              Type
-              <select id="obs-type">
-                <option value="low_bridge">Low bridge (clearance m)</option>
-                <option value="narrow_road">Narrow road (width m)</option>
-                <option value="weight_limit">Weight limit (t)</option>
-                <option value="steep_slope">Steep slope (%)</option>
-                <option value="note">Note / other</option>
-              </select>
-            </label>
-            <label>
-              Name
-              <input id="obs-name" type="text" value="Bridge A" />
-            </label>
-            <label>
-              Value
-              <input id="obs-value" type="number" step="0.1" value="3.8" />
-            </label>
-          </div>
-          <button type="button" id="btn-place-obs" class="btn btn--ghost btn--small">
-            Click map to place obstacle
-          </button>
-          <ul id="obs-list" class="obs-list"></ul>
-        </section>
-
-        <section class="section">
-          <h2>Vehicle</h2>
+          <h2>2. Vehicle template</h2>
+          <label>
+            Template
+            <select id="vehicle-template"></select>
+          </label>
+          <p id="template-desc" class="hint"></p>
           <div class="grid-2">
             <label>
               Max length (m)
@@ -101,8 +78,62 @@
           </div>
         </section>
 
+        <section class="section">
+          <h2>3. Add obstacle</h2>
+          <div class="grid-2">
+            <label class="span-2">
+              Type
+              <select id="obs-type">
+                <option value="low_bridge">Low bridge (clearance m)</option>
+                <option value="narrow_road">Narrow road (width m)</option>
+                <option value="weight_limit">Weight limit (t)</option>
+                <option value="steep_slope">Steep slope (%)</option>
+                <option value="note">Note / other</option>
+              </select>
+            </label>
+            <label>
+              Name
+              <input id="obs-name" type="text" value="Bridge A" />
+            </label>
+            <label>
+              Value
+              <input id="obs-value" type="number" step="0.1" value="3.8" />
+            </label>
+            <label>
+              Severity
+              <select id="obs-severity">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
+              </select>
+            </label>
+            <label class="check-label">
+              <input id="obs-bypass" type="checkbox" />
+              Bypass possible?
+            </label>
+            <label class="span-2">
+              Note
+              <input id="obs-note" type="text" placeholder="Field note…" />
+            </label>
+            <label class="span-2 file-label">
+              Photo (optional)
+              <input id="obs-photo" type="file" accept="image/*" />
+            </label>
+          </div>
+          <button type="button" id="btn-place-obs" class="btn btn--ghost btn--small">
+            Click map to place (snaps to km)
+          </button>
+          <ul id="obs-list" class="obs-list"></ul>
+        </section>
+
         <section class="section actions">
           <button type="button" id="btn-analyze" class="btn btn--primary">Run Analysis</button>
+          <button type="button" id="btn-save-project" class="btn btn--ghost">Save project</button>
+          <label class="btn btn--ghost btn--small file-as-btn">
+            Load project
+            <input id="project-file" type="file" accept=".json,application/json" hidden />
+          </label>
           <button type="button" id="btn-reset" class="btn btn--ghost">Reset</button>
           <p id="status" class="status" role="status"></p>
         </section>
@@ -110,11 +141,12 @@
         <section class="section" id="summary-section" hidden>
           <h2>Result</h2>
           <div id="summary" class="summary"></div>
+          <div id="checklist" class="checklist"></div>
           <div id="downloads" class="downloads"></div>
         </section>
 
         <footer class="footnote">
-          Sample: Montpellier → Lyon KMZ · Upload your own corridor · Not for certified operational planning
+          Obstacles snap to route chainage · Templates: blade / tower / nacelle · Not for certified planning
         </footer>
       </aside>
 

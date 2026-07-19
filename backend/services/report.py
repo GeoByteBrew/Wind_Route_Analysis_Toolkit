@@ -65,6 +65,19 @@ def export_csv(result: dict[str, Any], export_id: str | None = None) -> Path:
             }
         )
 
+    for feature in result.get("obstacles", {}).get("features", []):
+        props = feature["properties"]
+        if props.get("status") not in ("conflict", "caution"):
+            continue
+        rows.append(
+            {
+                "type": props.get("type") or "obstacle",
+                "name": props.get("name"),
+                "detail": props.get("detail") or "",
+                "severity": props.get("status"),
+            }
+        )
+
     with path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=["type", "name", "detail", "severity"])
         writer.writeheader()
@@ -92,10 +105,10 @@ def export_pdf(result: dict[str, Any], export_id: str | None = None) -> Path:
 
     doc = SimpleDocTemplate(str(path), pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm)
     story = []
-    story.append(Paragraph("Wind Route Analysis Toolkit — Route Report", title_style))
+    story.append(Paragraph("Route Analysis Toolkit — Route Report", title_style))
     story.append(
         Paragraph(
-            f"Region: Hérault (Occitanie, France) · Generated: "
+            f"Mode: {summary.get('mode', 'demo')} · Generated: "
             f"{datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}",
             body,
         )
@@ -146,8 +159,19 @@ def export_pdf(result: dict[str, Any], export_id: str | None = None) -> Path:
                 ["Steep slope", str(p.get("name")), f"{p.get('max_slope_pct')} %"]
             )
 
+    for feature in result.get("obstacles", {}).get("features", []):
+        p = feature["properties"]
+        if p.get("status") in ("conflict", "caution"):
+            table_data.append(
+                [
+                    str(p.get("type") or "obstacle").replace("_", " ").title(),
+                    str(p.get("name")),
+                    str(p.get("detail") or p.get("status")),
+                ]
+            )
+
     if len(table_data) == 1:
-        table_data.append(["—", "No blocking issues", "Route looks feasible on sample data"])
+        table_data.append(["—", "No blocking issues", "Route looks feasible for these constraints"])
 
     table = Table(table_data, colWidths=[35 * mm, 60 * mm, 70 * mm])
     table.setStyle(
@@ -172,8 +196,8 @@ def export_pdf(result: dict[str, Any], export_id: str | None = None) -> Path:
     story.append(Spacer(1, 12))
     story.append(
         Paragraph(
-            "<i>Demo note: analysis uses synthetic sample geospatial data for Hérault. "
-            "Not for operational transport planning.</i>",
+            "<i>Note: uploaded-route analysis uses user-provided geometry and obstacles. "
+            "Not for certified operational transport planning.</i>",
             body,
         )
     )

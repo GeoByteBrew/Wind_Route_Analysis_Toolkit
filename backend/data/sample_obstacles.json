@@ -1,0 +1,29 @@
+[
+  {
+    "id": "obs_nimes_bridge",
+    "name": "Low bridge near Nîmes corridor",
+    "type": "low_bridge",
+    "value": 3.7,
+    "lon": 4.62745,
+    "lat": 43.95685,
+    "note": "Sample obstacle for Montpellier → Lyon demo"
+  },
+  {
+    "id": "obs_valence_width",
+    "name": "Narrow section (mid corridor)",
+    "type": "narrow_road",
+    "value": 4.0,
+    "lon": 4.80729,
+    "lat": 44.54327,
+    "note": "Sample obstacle for Montpellier → Lyon demo"
+  },
+  {
+    "id": "obs_vienne_weight",
+    "name": "Weight-restricted span",
+    "type": "weight_limit",
+    "value": 50,
+    "lon": 4.86352,
+    "lat": 45.21225,
+    "note": "Sample obstacle for Montpellier → Lyon demo"
+  }
+]

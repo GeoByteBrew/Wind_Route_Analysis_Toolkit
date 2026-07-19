@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Wind Route Analysis Toolkit">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Route Analysis Toolkit">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#e8efe8"/>
@@ -12,6 +12,6 @@
   <circle cx="980" cy="270" r="14" fill="#c45c26"/>
   <circle cx="520" cy="380" r="10" fill="#9f1239"/>
   <circle cx="720" cy="300" r="10" fill="#9f1239"/>
-  <text x="80" y="120" font-family="Georgia, serif" font-size="48" fill="#14201a">Wind Route Analysis Toolkit</text>
-  <text x="80" y="170" font-family="Arial, sans-serif" font-size="22" fill="#5a6b61">Hérault · Montpellier corridor · FastAPI + Leaflet</text>
+  <text x="80" y="120" font-family="Georgia, serif" font-size="48" fill="#14201a">Route Analysis Toolkit</text>
+  <text x="80" y="170" font-family="Arial, sans-serif" font-size="22" fill="#5a6b61">Upload corridor · Mark obstacles · Export report · FastAPI + Leaflet</text>
 </svg>

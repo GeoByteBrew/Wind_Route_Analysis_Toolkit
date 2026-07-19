@@ -1,71 +1,94 @@
-# Wind Route Analysis Toolkit
+# Route Analysis Toolkit
 
-Python + Leaflet Web GIS toolkit for analyzing transportation routes of oversized wind turbine components against bridge clearance, road width, and terrain slope — using open sample geospatial data for **Hérault** (Occitanie, France).
+Python + Leaflet Web GIS toolkit for analyzing oversized transport corridors.
 
-> Demo region centered on Montpellier. Synthetic sample network for education and portfolio use — **not** for operational transport planning.
+**Workflow:** upload a real route (My Maps **KMZ**/KML · GeoJSON · GPX) → mark obstacles on the map → compare against vehicle limits → export PDF / CSV / GeoJSON.
 
-![Hérault demo region](images/hero-placeholder.svg)
+Includes a built-in sample: **Montpellier → Lyon** (KMZ).
+
+> Not for certified operational transport planning.
+
+![Toolkit hero](images/hero-placeholder.svg)
 
 ## Features
 
-- **Interactive Web Map** — Leaflet UI: click start / destination, run analysis in the browser
-- **Route Analysis** — shortest feasible path on a constrained road graph (NetworkX)
-- **Bridge Clearance Check** — flag overpasses below vehicle height
-- **Narrow Road Detection** — highlight tight segments relative to vehicle width
-- **Slope Analysis** — intersect route with steep terrain hazard zones
-- **Exports** — GeoJSON · CSV · PDF report
+- **Upload route** — GeoJSON, KML, **KMZ**, GPX
+- **Obstacle annotation** — low bridge, narrow road, weight limit, steep slope, notes
+- **Vehicle constraints** — length / width / height / weight / max slope
+- **Automatic feasibility report** — conflict vs caution vs ok
+- **Exports** — GeoJSON · CSV · PDF
+- **Sample corridor** — Montpellier → Lyon KMZ with example obstacles
 
 ## Technologies
 
 | Layer | Stack |
 |-------|--------|
-| Backend | Python, FastAPI, GeoPandas, Shapely, NetworkX, Pandas, ReportLab |
+| Backend | Python, FastAPI, Shapely, NumPy, ReportLab |
 | Frontend | Leaflet, vanilla JS |
-| Data | GeoJSON sample layers for Hérault |
+| Sample | `backend/data/sample_montpellier_lyon.kmz` |
 
 ## Quick start
 
 ```bash
-git clone https://github.com/<you>/wind-route-analysis-toolkit.git
-cd wind-route-analysis-toolkit
+git clone https://github.com/GeoByteBrew/Route_Analysis_Toolkit.git
+cd Route_Analysis_Toolkit
 
 python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 
 pip install -r requirements.txt
-python scripts/generate_sample_data.py
-
 uvicorn backend.app:app --reload --host 127.0.0.1 --port 8000
 ```
 
 Open [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
-### Try the demo
+### Try it
 
-1. Default points load as **Montpellier → Béziers**
-2. Adjust vehicle limits (length / width / height / weight / max slope)
-3. Click **Run Analysis**
-4. Inspect route, low bridges, steep zones
+1. App loads **Montpellier → Lyon** sample KMZ with example obstacles
+2. Or upload your own **KMZ / KML / GeoJSON / GPX**
+3. Click **Click map to place obstacle**, set type/value, click the route
+4. Adjust vehicle limits → **Run Analysis**
 5. Download **GeoJSON / CSV / PDF**
 
-Or pick new points: **Select Start** → click map → **Select Destination** → **Run Analysis**.
-
 ## Example API
+
+### Sample route
+
+```bash
+curl -s http://127.0.0.1:8000/api/sample/route | python3 -m json.tool
+```
+
+### Upload a KMZ
+
+```bash
+curl -s -X POST http://127.0.0.1:8000/api/upload/route \
+  -F "file=@backend/data/sample_montpellier_lyon.kmz" | python3 -m json.tool
+```
+
+### Analyze route + obstacles
 
 ```bash
 curl -s -X POST http://127.0.0.1:8000/api/analyze \
   -H 'Content-Type: application/json' \
-  -d '{
-    "start": {"lon": 3.8767, "lat": 43.6108},
-    "end":   {"lon": 3.2158, "lat": 43.3442},
-    "vehicle": {
-      "length_m": 45,
-      "width_m": 4.5,
-      "height_m": 4.2,
-      "weight_t": 80,
-      "max_slope_pct": 8
+  -d @- <<'EOF' | python3 -m json.tool
+{
+  "route": {
+    "type": "Feature",
+    "properties": {"name": "demo"},
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [[3.87613,43.61087],[4.80729,44.54327],[4.8355,45.76412]]
     }
-  }' | python3 -m json.tool
+  },
+  "obstacles": [
+    {"name": "Low bridge", "type": "low_bridge", "value": 3.7, "lon": 4.62745, "lat": 43.95685}
+  ],
+  "vehicle": {
+    "length_m": 45, "width_m": 4.5, "height_m": 4.2,
+    "weight_t": 80, "max_slope_pct": 8
+  }
+}
+EOF
 ```
 
 ### Key endpoints
@@ -73,84 +96,49 @@ curl -s -X POST http://127.0.0.1:8000/api/analyze \
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/api/health` | Health check |
-| `GET` | `/api/meta` | Region metadata |
-| `GET` | `/api/layers/roads` | Sample road network |
-| `GET` | `/api/layers/bridges` | Sample bridges |
-| `GET` | `/api/layers/slopes` | Steep slope zones |
-| `POST` | `/api/analyze` | Full route + constraints analysis |
+| `GET` | `/api/meta` | App metadata |
+| `GET` | `/api/sample/route` | Montpellier → Lyon sample + obstacles |
+| `POST` | `/api/upload/route` | Parse GeoJSON / KML / KMZ / GPX |
+| `POST` | `/api/analyze` | Route + obstacles analysis |
 | `GET` | `/api/exports/{file}` | Download generated report |
-
-## Project layout
-
-```
-wind-route-analysis-toolkit/
-├── README.md
-├── LICENSE
-├── requirements.txt
-├── backend/
-│   ├── app.py                 # FastAPI entry
-│   ├── data/                  # roads, bridges, slopes, places (GeoJSON)
-│   └── services/
-│       ├── route.py
-│       ├── bridges.py
-│       ├── slope.py
-│       └── report.py
-├── frontend/
-│   ├── index.html
-│   ├── css/style.css
-│   └── js/{map.js,app.js}
-├── scripts/
-│   └── generate_sample_data.py
-├── notebooks/
-├── images/
-└── outputs/
-```
 
 ## How analysis works
 
 ```mermaid
 flowchart LR
-  A[Start / End + vehicle limits] --> B[Build constrained road graph]
-  B --> C[Shortest path NetworkX]
-  C --> D[Bridge clearance check]
-  C --> E[Slope zone intersection]
-  C --> F[Narrow segment flags]
-  D --> G[Leaflet map + PDF / CSV / GeoJSON]
-  E --> G
-  F --> G
+  A[Upload KMZ / KML / GeoJSON / GPX] --> B[Show corridor on Leaflet]
+  B --> C[User places obstacles]
+  C --> D[Vehicle limits]
+  D --> E[Compare values vs constraints]
+  E --> F[Feasibility + PDF / CSV / GeoJSON]
 ```
 
-1. Roads narrower than vehicle **width**, or steeper than **max slope**, are removed from the graph.
-2. Remaining edges are costed by length with soft penalties for tighter / steeper roads.
-3. Bridges within a corridor of the path are compared to vehicle **height**.
-4. Slope polygons intersecting the path are flagged if above the vehicle slope limit.
+| Obstacle type | Conflict when |
+|---------------|---------------|
+| Low bridge | clearance &lt; vehicle height |
+| Narrow road | width &lt; vehicle width |
+| Weight limit | limit &lt; vehicle weight |
+| Steep slope | slope &gt; vehicle max slope |
+| Note | always caution if on corridor |
 
-## Sample data
+## Project layout
 
-Generated by `scripts/generate_sample_data.py` for towns across Hérault (Montpellier, Béziers, Sète, Lodève, …):
-
-| File | Contents |
-|------|----------|
-| `backend/data/roads.geojson` | Connected inter-town road segments with width & slope |
-| `backend/data/bridges.geojson` | Bridge / overpass clearances |
-| `backend/data/slope_zones.geojson` | Steep terrain hazard polygons |
-| `backend/data/places.geojson` | Place labels |
-
-Regenerate anytime:
-
-```bash
-python scripts/generate_sample_data.py
 ```
-
-## What this is / isn’t
-
-| Is | Isn’t |
-|----|-------|
-| Portfolio-ready Web GIS demo | Production routing engine |
-| Transparent constraint workflow | Live OSM / traffic feed |
-| Reproducible sample Hérault region | Certified clearance database |
-
-Future ideas: real OSMnx extract for Hérault, weight-restricted edges, alternative corridors, Türkiye region pack.
+Route_Analysis_Toolkit/
+├── backend/
+│   ├── app.py
+│   ├── data/
+│   │   ├── sample_montpellier_lyon.kmz
+│   │   └── sample_obstacles.json
+│   └── services/
+│       ├── parse_route.py
+│       ├── custom_analyze.py
+│       ├── vehicle.py
+│       └── report.py
+├── frontend/
+├── scripts/run.sh
+└── outputs/
+```
 
 ## License
 

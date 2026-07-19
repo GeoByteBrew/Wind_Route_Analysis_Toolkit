@@ -284,6 +284,82 @@ input:focus {
   color: var(--muted);
 }
 
+.file-label input[type="file"] {
+  padding: 0.45rem 0;
+  border: 0;
+  background: transparent;
+}
+
+select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+}
+
+.hint {
+  margin: 0.55rem 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.row-actions {
+  margin-top: 0.55rem;
+}
+
+.btn--small {
+  padding: 0.55rem 0.75rem;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.obs-list {
+  list-style: none;
+  margin: 0.7rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.obs-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+}
+
+.obs-list li .hint {
+  display: block;
+  margin: 0.15rem 0 0;
+}
+
+.linkish {
+  border: 0;
+  background: transparent;
+  color: var(--bad);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 650;
+  cursor: pointer;
+  padding: 0;
+  white-space: nowrap;
+}
+
+#btn-place-obs.chip--active,
+#btn-place-obs.chip--active:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
 .map-wrap {
   position: relative;
   min-height: 0;

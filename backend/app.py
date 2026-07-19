@@ -1,34 +1,38 @@
-"""FastAPI application for Wind Route Analysis Toolkit."""
+"""FastAPI application for Route Analysis Toolkit."""
 
 from __future__ import annotations
 
+import json
 import uuid
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from backend.services.bridges import check_bridges, load_bridges
+from backend.services.custom_analyze import analyze_custom_route
+from backend.services.parse_route import parse_route_file
 from backend.services.report import export_csv, export_pdf
-from backend.services.route import VehicleConstraints, find_route, load_roads
-from backend.services.slope import check_slopes, load_slope_zones
+from backend.services.vehicle import VehicleConstraints
 
 ROOT = Path(__file__).resolve().parents[1]
 FRONTEND = ROOT / "frontend"
 DATA = ROOT / "backend" / "data"
 OUTPUTS = ROOT / "outputs"
+SAMPLE_KMZ = DATA / "sample_montpellier_lyon.kmz"
+SAMPLE_OBSTACLES = DATA / "sample_obstacles.json"
 
 app = FastAPI(
-    title="Wind Route Analysis Toolkit",
+    title="Route Analysis Toolkit",
     description=(
-        "Python + Leaflet toolkit for analyzing oversized wind-turbine "
-        "transport routes in Hérault (France) using open sample geospatial data."
+        "Python + Leaflet toolkit for analyzing oversized transport corridors: "
+        "upload a route (GeoJSON/KML/KMZ/GPX), mark obstacles, export PDF/CSV reports. "
+        "Includes a Montpellier → Lyon sample KMZ."
     ),
-    version="0.1.0",
+    version="0.3.0",
 )
 
 app.add_middleware(
@@ -39,11 +43,6 @@ app.add_middleware(
 )
 
 
-class LonLat(BaseModel):
-    lon: float = Field(..., ge=-180, le=180)
-    lat: float = Field(..., ge=-90, le=90)
-
-
 class VehicleInput(BaseModel):
     length_m: float = Field(45.0, gt=0, le=120)
     width_m: float = Field(4.5, gt=0, le=10)
@@ -52,71 +51,94 @@ class VehicleInput(BaseModel):
     max_slope_pct: float = Field(8.0, gt=0, le=25)
 
 
-class AnalyzeRequest(BaseModel):
-    start: LonLat
-    end: LonLat
+class ObstacleInput(BaseModel):
+    id: Optional[str] = None
+    name: str = "Obstacle"
+    type: Literal["low_bridge", "narrow_road", "weight_limit", "steep_slope", "note"] = "low_bridge"
+    value: Optional[float] = None
+    lon: float = Field(..., ge=-180, le=180)
+    lat: float = Field(..., ge=-90, le=90)
+    note: Optional[str] = ""
+
+
+class CustomAnalyzeRequest(BaseModel):
+    route: dict[str, Any]
+    obstacles: list[ObstacleInput] = Field(default_factory=list)
     vehicle: VehicleInput = Field(default_factory=VehicleInput)
 
 
-def _feasibility(bridge_conflicts: int, steep_count: int, narrow_count: int) -> Literal["feasible", "caution", "blocked"]:
-    if bridge_conflicts > 0:
-        return "blocked"
-    if steep_count > 0 or narrow_count > 0:
-        return "caution"
-    return "feasible"
+def _write_exports(payload: dict[str, Any]) -> dict[str, str]:
+    export_id = uuid.uuid4().hex[:10]
+    csv_path = export_csv(payload, export_id)
+    pdf_path = export_pdf(payload, export_id)
+    geojson_path = OUTPUTS / f"route_{export_id}.geojson"
+    OUTPUTS.mkdir(parents=True, exist_ok=True)
+
+    features = [payload["route"]]
+    if payload.get("obstacles"):
+        features.extend(payload["obstacles"].get("features", []))
+
+    geojson_path.write_text(
+        json.dumps({"type": "FeatureCollection", "features": features}, indent=2),
+        encoding="utf-8",
+    )
+    return {
+        "geojson": f"/api/exports/{geojson_path.name}",
+        "csv": f"/api/exports/{csv_path.name}",
+        "pdf": f"/api/exports/{pdf_path.name}",
+        "export_id": export_id,
+    }
 
 
 @app.get("/api/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "region": "Hérault", "center": "Montpellier"}
+    return {"status": "ok", "version": "0.3.0", "modes": "upload"}
 
 
 @app.get("/api/meta")
 def meta() -> dict[str, Any]:
-    roads = load_roads()
-    bridges = load_bridges()
-    slopes = load_slope_zones()
     return {
-        "region": "Hérault",
-        "country": "France",
-        "center": {"lon": 3.55, "lat": 43.55},
-        "bounds": [[43.25, 2.70], [43.85, 4.25]],
-        "counts": {
-            "roads": int(len(roads)),
-            "bridges": int(len(bridges)),
-            "slope_zones": int(len(slopes)),
-        },
-        "note": "Sample / synthetic geospatial data for demonstration.",
+        "region": "France",
+        "sample": "Montpellier → Lyon",
+        "center": {"lon": 4.35, "lat": 44.70},
+        "bounds": [[43.50, 3.70], [45.90, 5.00]],
+        "accepted_formats": ["geojson", "kml", "kmz", "gpx"],
+        "modes": ["upload"],
+        "note": "Upload a corridor, mark obstacles, export a report.",
     }
 
 
-@app.get("/api/layers/roads")
-def layer_roads() -> dict[str, Any]:
-    return load_roads().__geo_interface__
+@app.get("/api/sample/route")
+def sample_route() -> dict[str, Any]:
+    if not SAMPLE_KMZ.exists():
+        raise HTTPException(404, "sample_montpellier_lyon.kmz missing")
+    parsed = parse_route_file(SAMPLE_KMZ.name, SAMPLE_KMZ.read_bytes())
+    obstacles = []
+    if SAMPLE_OBSTACLES.exists():
+        obstacles = json.loads(SAMPLE_OBSTACLES.read_text(encoding="utf-8"))
+    parsed["obstacles"] = obstacles
+    parsed["route"]["properties"]["name"] = "Montpellier → Lyon (sample KMZ)"
+    return parsed
 
 
-@app.get("/api/layers/bridges")
-def layer_bridges() -> dict[str, Any]:
-    return load_bridges().__geo_interface__
-
-
-@app.get("/api/layers/slopes")
-def layer_slopes() -> dict[str, Any]:
-    return load_slope_zones().__geo_interface__
-
-
-@app.get("/api/layers/places")
-def layer_places() -> dict[str, Any]:
-    path = DATA / "places.geojson"
-    if not path.exists():
-        raise HTTPException(404, "places.geojson missing — run scripts/generate_sample_data.py")
-    import json
-
-    return json.loads(path.read_text(encoding="utf-8"))
+@app.post("/api/upload/route")
+async def upload_route(file: UploadFile = File(...)) -> dict[str, Any]:
+    content = await file.read()
+    if not content:
+        raise HTTPException(400, "Empty file")
+    if len(content) > 20_000_000:
+        raise HTTPException(400, "File too large (max 20 MB)")
+    try:
+        return parse_route_file(file.filename or "route.kmz", content)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(400, f"Could not parse route file: {exc}") from exc
 
 
 @app.post("/api/analyze")
-def analyze(req: AnalyzeRequest) -> dict[str, Any]:
+@app.post("/api/analyze/custom")
+def analyze_custom(req: CustomAnalyzeRequest) -> dict[str, Any]:
     vehicle = VehicleConstraints(
         length_m=req.vehicle.length_m,
         width_m=req.vehicle.width_m,
@@ -124,81 +146,27 @@ def analyze(req: AnalyzeRequest) -> dict[str, Any]:
         weight_t=req.vehicle.weight_t,
         max_slope_pct=req.vehicle.max_slope_pct,
     )
-
     try:
-        route_result = find_route(
-            start={"lon": req.start.lon, "lat": req.start.lat},
-            end={"lon": req.end.lon, "lat": req.end.lat},
+        result = analyze_custom_route(
+            route_feature=req.route,
+            obstacles=[o.model_dump() for o in req.obstacles],
             vehicle=vehicle,
         )
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-    route_geom = route_result["route_geometry"]
-    bridges = check_bridges(route_geom, vehicle.height_m)
-    slopes = check_slopes(route_geom, vehicle.max_slope_pct)
-
-    # Narrow roads: segments already filtered by hard width; report near-miss widths
-    narrow = route_result["narrow_segments"]
-    # Also surface roads that exist in network but were excluded? Not needed for MVP.
-
-    bridge_conflicts = bridges["conflict_count"]
-    steep_count = slopes["steep_count"]
-    feasibility = _feasibility(bridge_conflicts, steep_count, len(narrow))
-    issues_count = bridge_conflicts + steep_count + len(narrow)
+        raise HTTPException(400, str(exc)) from exc
 
     payload: dict[str, Any] = {
-        "route": route_result["route"],
-        "segments": route_result["segments"],
-        "narrow_roads": narrow,
-        "bridges": bridges,
-        "slopes": slopes,
-        "snapped_start": route_result["snapped_start"],
-        "snapped_end": route_result["snapped_end"],
+        **result,
         "vehicle": req.vehicle.model_dump(),
-        "summary": {
-            "distance_km": route_result["route"]["properties"]["distance_km"],
-            "feasibility": feasibility,
-            "issues_count": issues_count,
-            "bridge_conflicts": bridge_conflicts,
-            "steep_zones": steep_count,
-            "narrow_segments": len(narrow),
-            "region": "Hérault",
-        },
     }
-
-    export_id = uuid.uuid4().hex[:10]
-    csv_path = export_csv(payload, export_id)
-    pdf_path = export_pdf(payload, export_id)
-    geojson_path = OUTPUTS / f"route_{export_id}.geojson"
-    OUTPUTS.mkdir(parents=True, exist_ok=True)
-    import json
-
-    geojson_path.write_text(
-        json.dumps(
-            {
-                "type": "FeatureCollection",
-                "features": [payload["route"]]
-                + bridges.get("features", [])
-                + slopes.get("features", []),
-            },
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-
-    payload["downloads"] = {
-        "geojson": f"/api/exports/{geojson_path.name}",
-        "csv": f"/api/exports/{csv_path.name}",
-        "pdf": f"/api/exports/{pdf_path.name}",
-    }
-    payload["export_id"] = export_id
+    downloads = _write_exports(payload)
+    payload["export_id"] = downloads.pop("export_id")
+    payload["downloads"] = downloads
     return payload
 
 
 @app.get("/api/exports/{filename}")
 def get_export(filename: str) -> FileResponse:
-    # Prevent path traversal
     safe = Path(filename).name
     path = OUTPUTS / safe
     if not path.exists() or not path.is_file():
@@ -208,6 +176,7 @@ def get_export(filename: str) -> FileResponse:
         ".csv": "text/csv",
         ".geojson": "application/geo+json",
         ".json": "application/json",
+        ".kmz": "application/vnd.google-earth.kmz",
     }.get(path.suffix.lower(), "application/octet-stream")
     return FileResponse(path, media_type=media, filename=safe)
 

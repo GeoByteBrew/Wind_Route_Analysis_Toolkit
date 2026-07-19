@@ -8,8 +8,9 @@ if [[ ! -d .venv ]]; then
   .venv/bin/pip install -r requirements.txt
 fi
 
-if [[ ! -f backend/data/roads.geojson ]]; then
-  .venv/bin/python scripts/generate_sample_data.py
+if [[ ! -f backend/data/sample_montpellier_lyon.kmz ]]; then
+  echo "Missing backend/data/sample_montpellier_lyon.kmz"
+  exit 1
 fi
 
 exec .venv/bin/uvicorn backend.app:app --reload --host 127.0.0.1 --port 8000

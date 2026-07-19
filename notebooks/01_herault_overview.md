@@ -1,9 +1,9 @@
-# Hérault overview notebook (placeholder)
+# Notebooks
 
-Use this folder for exploratory notebooks (GeoPandas plots, OSMnx experiments).
+Use this folder for exploratory notebooks (route geometry checks, obstacle experiments).
 
 Suggested next notebook:
 
-1. Load `backend/data/*.geojson`
-2. Plot roads / bridges / slope zones
-3. Compare constrained vs unconstrained shortest paths
+1. Load `backend/data/sample_montpellier_lyon.kmz`
+2. Plot the Montpellier → Lyon corridor
+3. Overlay `sample_obstacles.json` and test constraint rules
